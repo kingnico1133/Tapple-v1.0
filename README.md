@@ -1,60 +1,20 @@
-![Snap! Logo](src/snap_logo_sm.png)
-# Snap<em>!</em> Build Your Own Blocks
+# Tapple
 
-[https://snap.berkeley.edu][snap]
+Tapple is an independent, community-hosted fallback copy of the Snap! visual programming editor. The original idea was to give people another place to open a compatible editor if the main Snap! website or its hosting has an outage. Tapple is not a replacement for Snap!, and it is not affiliated with or endorsed by the Snap! team or UC Berkeley.
 
-**[Try Snap<em>!</em> Now](https://snap.berkeley.edu/snap/)**
+## How it works
 
-a visual, blocks based programming language
-inspired by Scratch
+- GitHub Actions downloads the pinned official Snap! release (v12.3.10) and assembles a complete static site.
+- The build checks that the editor's startup page and core JavaScript files are present before deployment.
+- GitHub Pages hosts that built copy independently of snap.berkeley.edu.
+- Open `snap.html` to use the editor. Use local file export/import for projects; Snap! cloud accounts and cloud saving are not provided by this independent copy.
 
-written by Jens Mönig and Brian Harvey  
-jens@moenig.org, bh@cs.berkeley.edu
+## Run locally
 
-## Snap<em>!</em> Community
+Download the official [Snap! v12.3.10 source archive](https://github.com/jmoenig/Snap/archive/refs/tags/v12.3.10.zip), extract it, and open `snap.html` in a modern browser. For the most reliable local setup, follow the upstream [offline instructions](https://github.com/jmoenig/Snap/blob/master/docs/Offline.md).
 
-This repository contains the source code for Snap<em>!</em> IDE. If you have
-questions about using Snap<em>!</em>, please check out [the Snap! Forum][forum].
+## Credits and license
 
-We also maintain an active community at [snap.berkeley.edu][snap],
-where you can save and share your own projects. You can also
-[check out the code][snapcloud], if you're curious.
+Tapple currently hosts the unmodified Snap! editor source from [jmoenig/Snap](https://github.com/jmoenig/Snap). Snap! was created by Jens Mönig and Brian Harvey. The source is licensed under the GNU Affero General Public License, version 3 or later (AGPL-3.0-or-later); see [LICENSE](LICENSE). The deployed site includes the corresponding source code and license notices.
 
-[snap]: https://snap.berkeley.edu
-[snapcloud]: https://github.com/snap-cloud/snapCloud
-[forum]: https://forum.snap.berkeley.edu
-
-## Security
-
-If you have security concerns, please do not post them publicly.
-Please reach out to us at [contact@snap.berkeley.edu](mailto:contact@snap.berkeley.edu).
-
-## Documentation
-
-The definitive source of how to use Snap! is the [Snap! Manual](help/SnapManual.pdf).
-
-* [API.md](docs/API.md) describes the API for modifying the Snap! interface.
-* [Extensions.md](docs/Extensions.md) describes the basic interface for building JavaScript extensions for Snap!
-* [Migrating.md](docs/Migrating.md) gives guidance for older extensions to migrate to Morphic 2 and Snap! v6.
-* [Offline.md](docs/Offline.md) has instructions for running Snap! as a progressive web application.
-
-_Please read the [Contribution Guidelines](docs/CONTRIBUTING.md) before making an issue or pull request. Thanks!_
-
-## License
-Copyright (C) 2008-2025 by Jens Mönig and Brian Harvey
-
-Snap! is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of
-the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-Want to use Snap! but scared by the open-source license? Get in touch with us,
-we'll make it work.
+Tapple is an independent fallback project, not an official Snap! service.
