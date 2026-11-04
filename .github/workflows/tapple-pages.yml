@@ -116,6 +116,87 @@ jobs:
               manifest_path.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
           PY
 
+      - name: Customize Tapple block colors and welcome screen
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path("site")
+          objects = root / "src" / "objects.js"
+          source = objects.read_text(encoding="utf-8")
+          old = """    motion : new Color(74, 108, 212),
+              looks : new Color(143, 86, 227),
+              sound : new Color(207, 74, 217),
+              pen : new Color(0, 161, 120),
+              control : new Color(230, 168, 34),"""
+          new = """    motion : new Color(45, 170, 75),
+              looks : new Color(143, 86, 227),
+              sound : new Color(145, 75, 190),
+              pen : new Color(0, 161, 120),
+              control : new Color(220, 55, 65),"""
+          if old not in source:
+              raise SystemExit("Could not find the expected upstream block color definitions.")
+          source = source.replace(old, new, 1)
+          source = source.replace(
+              "variables : new Color(243, 118, 29),",
+              "variables : new Color(0, 155, 155),",
+              1
+          )
+          objects.write_text(source, encoding="utf-8")
+
+          snap = root / "snap.html"
+          html = snap.read_text(encoding="utf-8")
+          if "id=\"tapple-welcome-screen\"" not in html:
+              welcome = r"""
+          <style>
+            #tapple-welcome-screen{position:fixed;inset:0;z-index:999999;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 35%,#284b43 0,#142b2b 42%,#101820 100%);font-family:Arial,Helvetica,sans-serif;color:#fff;opacity:0;animation:tappleFadeIn .7s ease forwards}
+            #tapple-welcome-screen:before,#tapple-welcome-screen:after{content:"";position:absolute;width:360px;height:360px;border:1px solid #ffffff18;border-radius:50%;animation:tappleOrbit 18s linear infinite}
+            #tapple-welcome-screen:after{width:520px;height:520px;animation-duration:26s;animation-direction:reverse}
+            .tapple-welcome-card{position:relative;z-index:1;width:min(540px,calc(100% - 40px));box-sizing:border-box;padding:48px 34px 40px;text-align:center;border:1px solid #ffffff26;border-radius:28px;background:#ffffff12;box-shadow:0 24px 80px #0006;backdrop-filter:blur(18px);animation:tappleRise .8s cubic-bezier(.2,.8,.2,1) both}
+            .tapple-apple{display:inline-block;font-size:76px;line-height:1;margin-bottom:18px;filter:drop-shadow(0 8px 18px #0005);animation:tappleBob 3s ease-in-out infinite}
+            .tapple-welcome-card h1{font-size:clamp(38px,8vw,58px);letter-spacing:-2px;margin:0 0 10px}
+            .tapple-welcome-card p{font-size:16px;line-height:1.6;color:#e1eeeb;margin:0 auto 28px;max-width:390px}
+            #tapple-start-button{border:0;border-radius:999px;padding:15px 32px;background:#b9f36b;color:#17321f;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px #0003;transition:transform .2s,box-shadow .2s}
+            #tapple-start-button:hover{transform:translateY(-3px);box-shadow:0 12px 28px #0005}
+            #tapple-start-button:focus-visible{outline:3px solid white;outline-offset:4px}
+            .tapple-welcome-foot{font-size:12px!important;color:#b9cbc6!important;margin:22px 0 0!important}
+            #tapple-welcome-screen.tapple-leaving{animation:tappleFadeOut .45s ease forwards}
+            @keyframes tappleFadeIn{to{opacity:1}}@keyframes tappleFadeOut{to{opacity:0;visibility:hidden}}
+            @keyframes tappleRise{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+            @keyframes tappleBob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-9px) rotate(4deg)}}
+            @keyframes tappleOrbit{to{transform:rotate(360deg)}}
+            @media(prefers-reduced-motion:reduce){#tapple-welcome-screen,.tapple-welcome-card,.tapple-apple,#tapple-welcome-screen:before,#tapple-welcome-screen:after{animation:none!important;opacity:1}}
+          </style>
+          <div id="tapple-welcome-screen" role="dialog" aria-modal="true" aria-labelledby="tapple-welcome-title">
+            <section class="tapple-welcome-card">
+              <div class="tapple-apple" aria-hidden="true">🍎</div>
+              <h1 id="tapple-welcome-title">Welcome to Tapple!</h1>
+              <p>A fresh place to dream up projects, experiment with blocks, and bring your ideas to life.</p>
+              <button id="tapple-start-button" type="button">Start creating</button>
+              <p class="tapple-welcome-foot">Your ideas. Your blocks. Your Tapple.</p>
+            </section>
+          </div>
+          <script>
+            window.addEventListener('load', function () {
+              var screen = document.getElementById('tapple-welcome-screen');
+              var start = document.getElementById('tapple-start-button');
+              if (!screen || !start) { return; }
+              start.addEventListener('click', function () {
+                screen.classList.add('tapple-leaving');
+                window.setTimeout(function () {
+                  screen.remove();
+                  var canvas = document.getElementById('world');
+                  if (canvas) { canvas.focus(); }
+                }, 460);
+              });
+              start.focus();
+            });
+          </script>
+          """
+              html = html.replace("</body>", welcome + "\n</body>", 1)
+              snap.write_text(html, encoding="utf-8")
+          PY
+
       - name: Verify the editor can start
         run: |
           set -euo pipefail
