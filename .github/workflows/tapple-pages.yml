@@ -31,6 +31,16 @@ jobs:
           unzip -q /tmp/snap.zip -d upstream
           cp -a upstream/Snap-12.3.10/. site/
 
+      - name: Apply Tapple page branding
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for path in Path("site").rglob("*.html"):
+              text = path.read_text(encoding="utf-8")
+              text = text.replace("Snap! Build your own blocks", "Tapple!")
+              path.write_text(text, encoding="utf-8")
+          PY
+
       - name: Verify the editor can start
         run: |
           set -euo pipefail
