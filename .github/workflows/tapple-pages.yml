@@ -31,54 +31,87 @@ jobs:
           unzip -q /tmp/snap.zip -d upstream
           cp -a upstream/Snap-12.3.10/. site/
 
-      - name: Apply Tapple apple branding
+      - name: Apply Tapple branding and apple icons
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import json
+          import json, struct, zlib
 
-          apple_icon = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#fff"/><text x="64" y="68" text-anchor="middle" dominant-baseline="central" font-size="104">🍎</text></svg>"""
-          Path("site/apple.svg").write_text(apple_icon, encoding="utf-8")
-          public_icon = "https://kingnico1133.github.io/Tapple-v1.0/apple.svg"
+          root = Path("site")
+          apple_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#fff"/><text x="64" y="68" text-anchor="middle" dominant-baseline="central" font-size="104">🍎</text></svg>"""
+          (root / "apple.svg").write_text(apple_svg, encoding="utf-8")
 
-          for path in Path("site").rglob("*.html"):
-              html = path.read_text(encoding="utf-8")
-              html = html.replace("Snap! Build your own blocks", "Tapple!")
-              html = html.replace("Snap! Build Your Own Blocks", "Tapple!")
-              html = html.replace('<title>Redirecting to Snap!</title>', '<title>Tapple!</title>')
-              html = html.replace('<link rel="icon" href="src/favicon.ico" type="image/x-icon">', '<link rel="icon" href="apple.svg" type="image/svg+xml">')
-              html = html.replace('<link rel="apple-touch-icon" href="img/snap-icon-152.png">', '<link rel="apple-touch-icon" href="apple.svg">')
-              html = html.replace('<meta name="mobile-web-app-title" content="Snap!">', '<meta name="mobile-web-app-title" content="Tapple!">')
-              html = html.replace('<meta name="msapplication-TileImage" content="img/snap-icon-144.png">', '<meta name="msapplication-TileImage" content="apple.svg">')
-              html = html.replace('img/snap-icon-152.png', 'apple.svg')
-              html = html.replace('img/snap-icon-144.png', 'apple.svg')
+          # Create a simple PNG apple icon using only Python's standard library.
+          # PNG is used for link previews because many preview services do not read SVG images.
+          w = h = 512
+          pixels = bytearray([255, 255, 255, 255] * w * h)
+          def ellipse(cx, cy, rx, ry, color):
+              r, g, b, a = color
+              for y in range(max(0, cy-ry), min(h, cy+ry+1)):
+                  for x in range(max(0, cx-rx), min(w, cx+rx+1)):
+                      if ((x-cx)/rx)**2 + ((y-cy)/ry)**2 <= 1:
+                          i = (y*w+x)*4
+                          pixels[i:i+4] = bytes((r,g,b,a))
+          # Red apple body with two rounded lobes and a small top dip.
+          red = (220, 35, 45, 255)
+          ellipse(220, 285, 125, 145, red)
+          ellipse(292, 285, 125, 145, red)
+          ellipse(256, 335, 150, 115, red)
+          # Stem and green leaf.
+          ellipse(257, 112, 13, 48, (105, 65, 35, 255))
+          ellipse(302, 92, 65, 28, (45, 155, 75, 255))
+          def chunk(t, data):
+              return struct.pack(">I", len(data)) + t + data + struct.pack(">I", zlib.crc32(t+data) & 0xffffffff)
+          raw = b"".join(b"\\x00" + bytes(pixels[y*w*4:(y+1)*w*4]) for y in range(h))
+          png = b"\\x89PNG\\r\\n\\x1a\\n" + chunk(b"IHDR", struct.pack(">2I5B", w,h,8,6,0,0,0)) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
+          (root / "apple.png").write_bytes(png)
 
-              meta = (
-                  '\n<meta property="og:type" content="website">'
-                  '\n<meta property="og:title" content="Tapple!">'
-                  '\n<meta property="og:description" content="A community-hosted fallback copy of the Snap! visual programming editor.">'
-                  f'\n<meta property="og:image" content="{public_icon}">'
-                  '\n<meta name="twitter:card" content="summary">'
-                  '\n<meta name="twitter:title" content="Tapple!">'
-                  f'\n<meta name="twitter:image" content="{public_icon}">'
-                  '\n'
-              )
-              if "<head>" in html and "property=\"og:title\"" not in html:
-                  html = html.replace("<head>", "<head>" + meta, 1)
-              path.write_text(html, encoding="utf-8")
+          public_base = "https://kingnico1133.github.io/Tapple-v1.0"
+          for path in root.rglob("*"):
+              if not path.is_file() or path.suffix.lower() not in {".html", ".js", ".json", ".css", ".txt", ".xml"}:
+                  continue
+              try:
+                  content = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  continue
+              # Rebrand visible product wording. Attribution and license are added separately below.
+              content = content.replace("Snap! Build your own blocks", "Tapple!")
+              content = content.replace("Snap! Build Your Own Blocks", "Tapple!")
+              content = content.replace("Snap!", "Tapple!")
+              content = content.replace("snap-icon-152.png", "apple.png")
+              content = content.replace("snap-icon-144.png", "apple.png")
+              # Ensure all HTML pages use the Tapple favicon and social preview assets.
+              if path.suffix.lower() == ".html":
+                  icon_tags = (
+                      '<link rel="icon" type="image/svg+xml" href="/Tapple-v1.0/apple.svg?v=2">\\n'
+                      '<link rel="icon" type="image/png" sizes="32x32" href="/Tapple-v1.0/apple.png?v=2">\\n'
+                      '<link rel="apple-touch-icon" href="/Tapple-v1.0/apple.png?v=2">\\n'
+                  )
+                  import re
+                  content = re.sub(r'<link[^>]+rel=["\\'](?:icon|apple-touch-icon)["\\'][^>]*>\\s*', '', content, flags=re.I)
+                  meta = (
+                      '<meta property="og:type" content="website">\\n'
+                      '<meta property="og:title" content="Tapple!">\\n'
+                      '<meta property="og:description" content="A community-hosted fallback copy of the visual programming editor.">\\n'
+                      f'<meta property="og:image" content="{public_base}/apple.png?v=2">\\n'
+                      '<meta name="twitter:card" content="summary">\\n'
+                      '<meta name="twitter:title" content="Tapple!">\\n'
+                      f'<meta name="twitter:image" content="{public_base}/apple.png?v=2">\\n'
+                  )
+                  if "<head>" in content:
+                      content = content.replace("<head>", "<head>\\n" + icon_tags + meta, 1)
+                  content = content.replace("<title>Redirecting to Tapple!</title>", "<title>Tapple!</title>")
+              path.write_text(content, encoding="utf-8")
 
-          manifest_path = Path("site/manifest.json")
+          manifest_path = root / "manifest.json"
           if manifest_path.exists():
               manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
               manifest["name"] = "Tapple!"
               manifest["short_name"] = "Tapple"
-              manifest["icons"] = [{
-                  "src": "apple.svg",
-                  "sizes": "any",
-                  "type": "image/svg+xml",
-                  "purpose": "any maskable"
-              }]
-              manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+              manifest["icons"] = [
+                  {"src": "apple.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+              ]
+              manifest_path.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
           PY
 
       - name: Verify the editor can start
