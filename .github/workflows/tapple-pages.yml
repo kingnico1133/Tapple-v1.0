@@ -35,10 +35,14 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
+
           for path in Path("site").rglob("*.html"):
-              text = path.read_text(encoding="utf-8")
-              text = text.replace("Snap! Build your own blocks", "Tapple!")
-              path.write_text(text, encoding="utf-8")
+              html = path.read_text(encoding="utf-8")
+              html = html.replace("Snap! Build your own blocks", "Tapple!")
+              html = re.sub(r"<title\b[^>]*>.*?</title>", "<title>Tapple!</title>", html, flags=re.I | re.S)
+              html = re.sub(r'(<meta\s+(?:property|name)=["\'](?:og:title|twitter:title|application-name)["\']\s+content=)["\'][^"\']*["\']', r'\1"Tapple!"', html, flags=re.I)
+              path.write_text(html, encoding="utf-8")
           PY
 
       - name: Verify the editor can start
