@@ -124,24 +124,16 @@ jobs:
           root = Path("site")
           objects = root / "src" / "objects.js"
           source = objects.read_text(encoding="utf-8")
-          old = """    motion : new Color(74, 108, 212),
-              looks : new Color(143, 86, 227),
-              sound : new Color(207, 74, 217),
-              pen : new Color(0, 161, 120),
-              control : new Color(230, 168, 34),"""
-          new = """    motion : new Color(45, 170, 75),
-              looks : new Color(143, 86, 227),
-              sound : new Color(145, 75, 190),
-              pen : new Color(0, 161, 120),
-              control : new Color(220, 55, 65),"""
-          if old not in source:
-              raise SystemExit("Could not find the expected upstream block color definitions.")
-          source = source.replace(old, new, 1)
-          source = source.replace(
-              "variables : new Color(243, 118, 29),",
-              "variables : new Color(0, 155, 155),",
-              1
-          )
+          replacements = {
+              "motion : new Color(74, 108, 212),": "motion : new Color(45, 170, 75),",
+              "control : new Color(230, 168, 34),": "control : new Color(220, 55, 65),",
+              "sound : new Color(207, 74, 217),": "sound : new Color(145, 75, 190),",
+              "variables : new Color(243, 118, 29),": "variables : new Color(0, 155, 155),",
+          }
+          for before, after in replacements.items():
+              if before not in source:
+                  raise SystemExit("Could not find expected block color: " + before)
+              source = source.replace(before, after, 1)
           objects.write_text(source, encoding="utf-8")
 
           snap = root / "snap.html"
