@@ -217,6 +217,24 @@ jobs:
               snap.write_text(html, encoding="utf-8")
           PY
 
+      - name: Refresh the offline cache on every Tapple build
+        env:
+          TAPPLE_BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          service_worker = Path("site/sw.js")
+          source = service_worker.read_text(encoding="utf-8")
+          old_cache = "cacheName = `snap-pwa-${snapVersion}`,"
+          new_cache = "cacheName = `tapple-pwa-${snapVersion}-" + os.environ["TAPPLE_BUILD_ID"] + "`,"
+          if old_cache not in source:
+              raise SystemExit("Could not find the expected upstream offline cache name")
+          service_worker.write_text(source.replace(old_cache, new_cache, 1), encoding="utf-8")
+          print("Updated Tapple offline cache to:", new_cache)
+          PY
+
       - name: Verify the editor can start
         run: |
           set -euo pipefail
