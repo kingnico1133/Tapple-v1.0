@@ -87,19 +87,21 @@ jobs:
                       '<link rel="icon" type="image/png" sizes="32x32" href="/Tapple-v1.0/apple.png?v=2">\\n'
                       '<link rel="apple-touch-icon" href="/Tapple-v1.0/apple.png?v=2">\\n'
                   )
-                  import re
-                  content = re.sub(r'<link[^>]+rel=["\\'](?:icon|apple-touch-icon)["\\'][^>]*>\\s*', '', content, flags=re.I)
-                  meta = (
-                      '<meta property="og:type" content="website">\\n'
-                      '<meta property="og:title" content="Tapple!">\\n'
-                      '<meta property="og:description" content="A community-hosted fallback copy of the visual programming editor.">\\n'
-                      f'<meta property="og:image" content="{public_base}/apple.png?v=2">\\n'
-                      '<meta name="twitter:card" content="summary">\\n'
-                      '<meta name="twitter:title" content="Tapple!">\\n'
-                      f'<meta name="twitter:image" content="{public_base}/apple.png?v=2">\\n'
-                  )
+                  content = content.replace('<link rel="icon" href="src/favicon.ico" type="image/x-icon">', '')
+                  content = content.replace('<link rel="apple-touch-icon" href="img/snap-icon-152.png">', '')
+                  content = content.replace('<link rel="icon" href="apple.svg" type="image/svg+xml">', '')
+                  icon_tags = """<link rel="icon" type="image/svg+xml" href="/Tapple-v1.0/apple.svg?v=3">
+          <link rel="icon" type="image/png" sizes="32x32" href="/Tapple-v1.0/apple.png?v=3">
+          <link rel="apple-touch-icon" href="/Tapple-v1.0/apple.png?v=3">"""
+                  meta = """<meta property="og:type" content="website">
+          <meta property="og:title" content="Tapple!">
+          <meta property="og:description" content="A community-hosted fallback copy of the visual programming editor.">
+          <meta property="og:image" content="https://kingnico1133.github.io/Tapple-v1.0/apple.png?v=3">
+          <meta name="twitter:card" content="summary">
+          <meta name="twitter:title" content="Tapple!">
+          <meta name="twitter:image" content="https://kingnico1133.github.io/Tapple-v1.0/apple.png?v=3">"""
                   if "<head>" in content:
-                      content = content.replace("<head>", "<head>\\n" + icon_tags + meta, 1)
+                      content = content.replace("<head>", "<head>\\n" + icon_tags + "\\n" + meta + "\\n", 1)
                   content = content.replace("<title>Redirecting to Tapple!</title>", "<title>Tapple!</title>")
               path.write_text(content, encoding="utf-8")
 
