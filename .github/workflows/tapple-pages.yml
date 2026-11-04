@@ -39,23 +39,32 @@ jobs:
 
           apple_icon = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#fff"/><text x="64" y="68" text-anchor="middle" dominant-baseline="central" font-size="104">🍎</text></svg>"""
           Path("site/apple.svg").write_text(apple_icon, encoding="utf-8")
+          public_icon = "https://kingnico1133.github.io/Tapple-v1.0/apple.svg"
 
           for path in Path("site").rglob("*.html"):
               html = path.read_text(encoding="utf-8")
               html = html.replace("Snap! Build your own blocks", "Tapple!")
               html = html.replace("Snap! Build Your Own Blocks", "Tapple!")
+              html = html.replace('<title>Redirecting to Snap!</title>', '<title>Tapple!</title>')
               html = html.replace('<link rel="icon" href="src/favicon.ico" type="image/x-icon">', '<link rel="icon" href="apple.svg" type="image/svg+xml">')
               html = html.replace('<link rel="apple-touch-icon" href="img/snap-icon-152.png">', '<link rel="apple-touch-icon" href="apple.svg">')
               html = html.replace('<meta name="mobile-web-app-title" content="Snap!">', '<meta name="mobile-web-app-title" content="Tapple!">')
               html = html.replace('<meta name="msapplication-TileImage" content="img/snap-icon-144.png">', '<meta name="msapplication-TileImage" content="apple.svg">')
               html = html.replace('img/snap-icon-152.png', 'apple.svg')
               html = html.replace('img/snap-icon-144.png', 'apple.svg')
-              if "<head>" in html:
-                  html = html.replace(
-                      "<head>",
-                      '<head>\\n<meta property="og:title" content="Tapple!">\\n<meta property="og:image" content="apple.svg">\\n<meta name="twitter:title" content="Tapple!">\\n<meta name="twitter:image" content="apple.svg">\\n',
-                      1
-                  )
+
+              meta = (
+                  '\n<meta property="og:type" content="website">'
+                  '\n<meta property="og:title" content="Tapple!">'
+                  '\n<meta property="og:description" content="A community-hosted fallback copy of the Snap! visual programming editor.">'
+                  f'\n<meta property="og:image" content="{public_icon}">'
+                  '\n<meta name="twitter:card" content="summary">'
+                  '\n<meta name="twitter:title" content="Tapple!">'
+                  f'\n<meta name="twitter:image" content="{public_icon}">'
+                  '\n'
+              )
+              if "<head>" in html and "property=\"og:title\"" not in html:
+                  html = html.replace("<head>", "<head>" + meta, 1)
               path.write_text(html, encoding="utf-8")
 
           manifest_path = Path("site/manifest.json")
@@ -69,7 +78,7 @@ jobs:
                   "type": "image/svg+xml",
                   "purpose": "any maskable"
               }]
-              manifest_path.write_text(json.dumps(manifest, indent=2) + "\\n", encoding="utf-8")
+              manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
           PY
 
       - name: Verify the editor can start
