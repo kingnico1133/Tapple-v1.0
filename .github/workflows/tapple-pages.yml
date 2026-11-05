@@ -38,7 +38,7 @@ jobs:
           import json, struct, zlib
 
           root = Path("site")
-          apple_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#fff"/><text x="64" y="68" text-anchor="middle" dominant-baseline="central" font-size="104">🍎</text></svg>"""
+          apple_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><path fill="#e63b45" d="M64 43c-10-10-30-12-42-1-16 15-11 47 1 65 8 12 17 17 27 14 9-3 16-3 25 0 10 3 19-2 27-14 12-18 17-50 1-65-12-11-32-9-39 1z"/><path fill="#70452f" d="M62 43c-2-13 2-24 11-33l6 4c-8 9-10 17-8 29z"/><path fill="#58b66a" d="M69 20C75 5 95 2 108 8c-2 17-18 28-36 21-4-2-5-5-3-9z"/></svg>"""
           (root / "apple.svg").write_text(apple_svg, encoding="utf-8")
 
           # Create a simple PNG apple icon using only Python's standard library.
@@ -173,7 +173,7 @@ jobs:
             #tapple-welcome-screen:before,#tapple-welcome-screen:after{content:"";position:absolute;width:360px;height:360px;border:1px solid #ffffff18;border-radius:50%;animation:tappleOrbit 18s linear infinite}
             #tapple-welcome-screen:after{width:520px;height:520px;animation-duration:26s;animation-direction:reverse}
             .tapple-welcome-card{position:relative;z-index:1;width:min(540px,calc(100% - 40px));box-sizing:border-box;padding:48px 34px 40px;text-align:center;border:1px solid #ffffff26;border-radius:28px;background:#ffffff12;box-shadow:0 24px 80px #0006;backdrop-filter:blur(18px);animation:tappleRise .8s cubic-bezier(.2,.8,.2,1) both}
-            .tapple-apple{display:inline-block;font-size:76px;line-height:1;margin-bottom:18px;filter:drop-shadow(0 8px 18px #0005);animation:tappleBob 3s ease-in-out infinite}
+            .tapple-apple{display:inline-block;line-height:1;margin-bottom:18px;filter:drop-shadow(0 8px 18px #0005);animation:tappleBob 3s ease-in-out infinite}.tapple-apple img{display:block;width:88px;height:88px;object-fit:contain}
             .tapple-welcome-card h1{font-size:clamp(38px,8vw,58px);letter-spacing:-2px;margin:0 0 10px}
             .tapple-welcome-card p{font-size:16px;line-height:1.6;color:#e1eeeb;margin:0 auto 28px;max-width:390px}
             #tapple-start-button{border:0;border-radius:999px;padding:15px 32px;background:#b9f36b;color:#17321f;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px #0003;transition:transform .2s,box-shadow .2s}
@@ -189,7 +189,7 @@ jobs:
           </style>
           <div id="tapple-welcome-screen" role="dialog" aria-modal="true" aria-labelledby="tapple-welcome-title">
             <section class="tapple-welcome-card">
-              <div class="tapple-apple" aria-hidden="true">🍎</div>
+              <div class="tapple-apple"><img src="apple.svg" alt="Tapple apple logo"></div>
               <h1 id="tapple-welcome-title">Welcome to Tapple!</h1>
               <p>A fresh place to dream up projects, experiment with blocks, and bring your ideas to life.</p>
               <button id="tapple-start-button" type="button">Start creating</button>
@@ -265,6 +265,117 @@ jobs:
               <p>When using this hosted copy, projects are saved locally or exported as files. Snap! cloud services may not be available.</p>
               <p>Snap! is free software licensed under the GNU Affero General Public License v3 or later. Original project: <a href="https://github.com/jmoenig/Snap">jmoenig/Snap</a>.</p>
             </main>
+          </body>
+          </html>
+          EOF
+
+      - name: Create the redesigned Tapple home page
+        run: |
+          cat > site/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+            <meta name="theme-color" content="#10251f">
+            <meta name="description" content="Tapple is a friendly, independent home for block-based creativity.">
+            <link rel="icon" type="image/svg+xml" href="apple.svg">
+            <link rel="apple-touch-icon" href="apple.png">
+            <link rel="manifest" href="manifest.json">
+            <title>Tapple — Create something awesome</title>
+            <style>
+              :root{color-scheme:dark;--bg:#10251f;--panel:#18372d;--lime:#c5f477;--cream:#f5f4e9;--muted:#b8c9bd;--line:#ffffff20}
+              *{box-sizing:border-box}
+              html{scroll-behavior:smooth}
+              body{margin:0;background:var(--bg);color:var(--cream);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+              a{color:inherit;text-decoration:none}
+              .shell{width:min(1120px,calc(100% - 48px));margin:auto}
+              header{height:84px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+              .brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:850;letter-spacing:-1px}
+              .brand img{width:38px;height:38px}
+              nav{display:flex;align-items:center;gap:28px;color:var(--muted);font-size:14px;font-weight:650}
+              nav a:hover{color:var(--cream)}
+              .nav-cta,.primary{display:inline-flex;align-items:center;justify-content:center;background:var(--lime);color:#173020;font-weight:850;border-radius:999px;padding:13px 21px;transition:transform .2s,box-shadow .2s}
+              .nav-cta:hover,.primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0004}
+              .hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center;padding:92px 0 100px;min-height:570px}
+              .eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--lime);font-size:12px;font-weight:850;letter-spacing:1.6px;text-transform:uppercase}
+              .dot{width:7px;height:7px;background:var(--lime);border-radius:50%;box-shadow:0 0 14px #c5f477}
+              h1{font-size:clamp(48px,7vw,82px);line-height:.99;letter-spacing:-5px;margin:22px 0 22px;max-width:660px}
+              h1 span{color:var(--lime)}
+              .intro{max-width:520px;color:var(--muted);font-size:18px;line-height:1.7;margin:0 0 32px}
+              .actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+              .secondary{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:999px;padding:13px 20px;font-weight:750}
+              .secondary:hover{background:#ffffff0b}
+              .art{position:relative;display:grid;place-items:center;min-height:350px}
+              .orb{position:absolute;width:min(340px,78vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#c5f477 0,#74b85d 28%,#2e7052 66%,#1b4437 100%);box-shadow:0 0 100px #8fdb6740,inset -20px -24px 55px #10251f66}
+              .apple{position:relative;width:210px;max-width:55%;filter:drop-shadow(0 22px 24px #06140f66);transform:rotate(-8deg);animation:float 5s ease-in-out infinite}
+              .spark{position:absolute;color:var(--lime);font-size:30px}
+              .spark.one{top:32px;right:12%}.spark.two{bottom:42px;left:8%;font-size:22px}
+              .features{padding:0 0 94px}
+              .section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:24px}
+              h2{font-size:30px;letter-spacing:-1.2px;margin:0}
+              .section-head p{color:var(--muted);margin:0;font-size:14px}
+              .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+              .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:25px;min-height:170px}
+              .card-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#c5f47718;color:var(--lime);font-size:21px;margin-bottom:20px}
+              .card h3{font-size:17px;margin:0 0 8px}
+              .card p{font-size:14px;line-height:1.6;color:var(--muted);margin:0}
+              .bottom{margin:0 0 42px;padding:30px;border-radius:22px;background:#c5f477;color:#173020;display:flex;justify-content:space-between;align-items:center;gap:24px}
+              .bottom h2{font-size:26px}.bottom p{margin:7px 0 0;color:#35513a;font-size:14px}
+              .bottom a{background:#173020;color:#f5f4e9;border-radius:999px;padding:13px 20px;font-weight:800;white-space:nowrap}
+              footer{border-top:1px solid var(--line);padding:25px 0 34px;color:var(--muted);font-size:12px;line-height:1.7;display:flex;justify-content:space-between;gap:20px}
+              @keyframes float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-13px) rotate(-4deg)}}
+              @media(max-width:760px){.shell{width:min(100% - 36px,560px)}header{height:72px}nav{gap:14px}nav .about-link{display:none}.hero{grid-template-columns:1fr;gap:10px;padding:68px 0 58px;text-align:center}.hero-copy{display:flex;flex-direction:column;align-items:center}h1{letter-spacing:-3px}.intro{font-size:16px}.actions{justify-content:center}.art{min-height:280px}.orb{width:250px}.apple{width:160px}.features{padding-bottom:58px}.section-head{display:block}.section-head p{margin-top:8px}.cards{grid-template-columns:1fr}.card{min-height:0}.bottom{align-items:flex-start;flex-direction:column}.bottom h2{font-size:23px}footer{flex-direction:column;gap:8px}}
+              @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+            </style>
+          </head>
+          <body>
+            <div class="shell">
+              <header>
+                <a class="brand" href="index.html"><img src="apple.svg" alt=""><span>Tapple</span></a>
+                <nav aria-label="Main navigation">
+                  <a class="about-link" href="#about">About</a>
+                  <a class="nav-cta" href="snap.html">Open editor&nbsp; ↗</a>
+                </nav>
+              </header>
+              <main>
+                <section class="hero">
+                  <div class="hero-copy">
+                    <div class="eyebrow"><span class="dot"></span> Your creative space</div>
+                    <h1>Big ideas.<br><span>Little blocks.</span></h1>
+                    <p class="intro">A fresh place to experiment, build projects, and bring your ideas to life — one block at a time.</p>
+                    <div class="actions">
+                      <a class="primary" href="snap.html">Start creating&nbsp; →</a>
+                      <a class="secondary" href="#about">What is Tapple?</a>
+                    </div>
+                  </div>
+                  <div class="art" aria-label="Tapple apple logo illustration">
+                    <div class="orb"></div>
+                    <img class="apple" src="apple.svg" alt="The Tapple apple">
+                    <span class="spark one">✦</span><span class="spark two">✳</span>
+                  </div>
+                </section>
+                <section class="features" id="about">
+                  <div class="section-head">
+                    <h2>Made for making.</h2>
+                    <p>Simple tools. Plenty of room to explore.</p>
+                  </div>
+                  <div class="cards">
+                    <article class="card"><div class="card-icon">▦</div><h3>Build with blocks</h3><p>Snap blocks together to make animations, games, stories, and experiments.</p></article>
+                    <article class="card"><div class="card-icon">↗</div><h3>Keep your projects</h3><p>Export your work as project files and open it again whenever you're ready.</p></article>
+                    <article class="card"><div class="card-icon">◎</div><h3>A handy backup</h3><p>An independently hosted place to go when the main editor is having trouble.</p></article>
+                  </div>
+                </section>
+                <section class="bottom">
+                  <div><h2>Ready to make something?</h2><p>Jump into the editor and see what you can create.</p></div>
+                  <a href="snap.html">Open Tapple&nbsp; →</a>
+                </section>
+              </main>
+              <footer>
+                <span>© Tapple · An independent community project</span>
+                <span>Built from Snap! · Not affiliated with or endorsed by the Snap! team or UC Berkeley.</span>
+              </footer>
+            </div>
           </body>
           </html>
           EOF
